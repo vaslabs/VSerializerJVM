@@ -20,7 +20,7 @@ public class ReferenceSensitiveAlphabeticalSerializer extends AlphabeticalSerial
     private final ThreadLocal<ByteBufferPutter> byteBufferPutterThreadLocal;
     private final ThreadLocal<Map<Integer, Object>> mappingThreadLocal;
 
-    protected ReferenceSensitiveAlphabeticalSerializer() {
+    public ReferenceSensitiveAlphabeticalSerializer() {
         byteBufferPutterThreadLocal = new ThreadLocal<>();
         mappingThreadLocal = new ThreadLocal<>();
     }
