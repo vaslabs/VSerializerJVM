@@ -29,6 +29,7 @@ public class SerializationUtils {
             primitiveWrappers.put(Double.class, Double.class.getMethod("valueOf", Double.TYPE));
             primitiveWrappers.put(Float.class, Float.class.getMethod("valueOf", Float.TYPE));
             primitiveWrappers.put(Character.class, Character.class.getMethod("valueOf", Character.TYPE));
+            primitiveWrappers.put(Byte.class, Byte.class.getMethod("valueOf", Byte.TYPE));
             primitiveWrappers = Collections.unmodifiableMap(primitiveWrappers);
         } catch (Exception e) {
             System.exit(1);
