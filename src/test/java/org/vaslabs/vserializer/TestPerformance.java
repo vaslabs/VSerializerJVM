@@ -2,6 +2,7 @@ package org.vaslabs.vserializer;
 
 import org.junit.Test;
 import static java.lang.System.out;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by vnicolaou on 19/08/16.
@@ -90,6 +91,7 @@ public class TestPerformance {
         byte[] data = TestUtils.serializeObject(someString);
         TestUtils.deserializeObject(data);
     }
+
 
 
 }

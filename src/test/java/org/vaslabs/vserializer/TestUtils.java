@@ -1,11 +1,6 @@
 package org.vaslabs.vserializer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Created by vnicolaou on 05/05/16.
@@ -110,7 +105,8 @@ public class TestUtils {
         protected String myOtherMessage;
     }
 
-    public static class AllEncapsulatedData implements Serializable {
+    public static class AllEncapsulatedData implements Externalizable {
+
         protected long a;// = 0xff121212;
         protected int b;// = 0x1111;
         protected short d;// = 0xff;
@@ -119,6 +115,19 @@ public class TestUtils {
         protected char f;
         protected float aFloat;
         protected double aDouble;
+
+        private void readObject(ObjectInputStream objectInputStream) throws IOException {
+            AllEncapsulatedData allEncapsulatedData = new AllEncapsulatedData();
+            allEncapsulatedData.a = objectInputStream.readLong();
+            allEncapsulatedData.aDouble = objectInputStream.readDouble();
+            allEncapsulatedData.aFloat = objectInputStream.readFloat();
+            allEncapsulatedData.b = objectInputStream.readInt();
+            allEncapsulatedData.c = objectInputStream.readByte();
+            allEncapsulatedData.d = objectInputStream.readShort();
+            allEncapsulatedData.e = objectInputStream.readBoolean();
+            allEncapsulatedData.f = objectInputStream.readChar();
+            objectInputStream.close();
+        }
 
         @Override
         public String toString() {
@@ -132,6 +141,32 @@ public class TestUtils {
             return stringBuilder.toString();
         }
 
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeLong(a);
+            out.writeDouble(aDouble);
+            out.writeFloat(aFloat);
+            out.writeInt(b);
+            out.writeByte(c);
+            out.writeShort(d);
+            out.writeBoolean(e);
+            out.writeChar(f);
+            out.close();
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            AllEncapsulatedData allEncapsulatedData = new AllEncapsulatedData();
+            allEncapsulatedData.a = in.readLong();
+            allEncapsulatedData.aDouble = in.readDouble();
+            allEncapsulatedData.aFloat = in.readFloat();
+            allEncapsulatedData.b = in.readInt();
+            allEncapsulatedData.c = in.readByte();
+            allEncapsulatedData.d = in.readShort();
+            allEncapsulatedData.e = in.readBoolean();
+            allEncapsulatedData.f = in.readChar();
+            in.close();
+        }
     }
 
     public static class AllEncapsulatedArrayData implements Serializable {

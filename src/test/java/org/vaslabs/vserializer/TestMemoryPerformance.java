@@ -1,7 +1,9 @@
 package org.vaslabs.vserializer;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
@@ -97,6 +99,30 @@ public class TestMemoryPerformance {
         byte[] jvmData = serializeObject(enumEncapsulator);
         System.out.println("VSerializer: " + data.length);
         System.out.println("JVM Serializer: " + jvmData.length);
+
+    }
+
+    @Test
+    public void test_serialization_of_all_primitive_types() {
+        TestUtils.AllEncapsulatedData allEncapsulatedData = new TestUtils.AllEncapsulatedData();
+        allEncapsulatedData.a = -1L;
+        allEncapsulatedData.b = 1;
+        allEncapsulatedData.c = 127;
+        allEncapsulatedData.d = -32768;
+        allEncapsulatedData.e = true;
+        allEncapsulatedData.f = 'h';
+        allEncapsulatedData.aFloat = 2.4f;
+        allEncapsulatedData.aDouble = 3.54;
+
+        byte[] data = vSerializer.serialize(allEncapsulatedData);
+
+        byte[] jvmData = serializeObject(allEncapsulatedData);
+        System.out.println("VSerializer: " + data.length);
+        System.out.println("JVM Serializer: " + jvmData.length);
+        System.out.println(Integer.toHexString(Class.class.hashCode()));
+        System.out.println(Arrays.toString(jvmData));
+        System.out.println(new String(jvmData));
+        System.out.println(HexBin.encode(jvmData));
 
     }
 }

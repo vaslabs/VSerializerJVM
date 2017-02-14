@@ -29,6 +29,17 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return SerializationUtils.toBytes(obj);
             }
         }
+        if (obj.getClass().isEnum() || obj.getClass().getEnclosingClass().isEnum()) {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+            int ordinal = 0;
+            try {
+                ordinal = getOrdinal(obj);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            byteBuffer.putInt(ordinal);
+            return byteBuffer.array();
+        }
         final Field[] fields = getAllFields(obj);
         final int size = computeSize(fields, obj);
 
@@ -87,6 +98,14 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return deserialisePrimitiveArray(data, clazz);
             } else {
                 return deserialiseArray(data, clazz);
+            }
+        }
+        if (clazz.isEnum()) {
+            ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+            try {
+                return generateEnum(clazz, byteBuffer.getInt());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         Field[] fields = getAllFields(clazz);
