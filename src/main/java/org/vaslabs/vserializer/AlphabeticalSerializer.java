@@ -29,7 +29,8 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return SerializationUtils.toBytes(obj);
             }
         }
-        if (obj.getClass().isEnum() || obj.getClass().getEnclosingClass().isEnum()) {
+        Class clazz = obj.getClass();
+        if (clazz.isEnum() || SerializationUtils.isEnum(clazz)) {
             ByteBuffer byteBuffer = ByteBuffer.allocate(4);
             int ordinal = 0;
             try {
@@ -217,12 +218,6 @@ public class AlphabeticalSerializer extends StringSerializer {
                 convert(byteBuffer, field, obj);
             } catch (Exception e) {
                 return null;
-            } finally {
-                try {
-                    SerializationUtils.houseKeeping(field);
-                } catch (Exception e) {
-
-                }
             }
         }
         return obj;
@@ -259,7 +254,7 @@ public class AlphabeticalSerializer extends StringSerializer {
 
                 Object innerObject = SerializationUtils.instantiate(field.getType());
                 field.set(obj, innerObject);
-                convert(byteBuffer, getAllFields(obj), innerObject);
+                convert(byteBuffer, getAllFields(innerObject), innerObject);
                 return;
             }
         }
@@ -405,8 +400,6 @@ public class AlphabeticalSerializer extends StringSerializer {
         }
         SerializationUtils.arrangeField(field, object);
         field.set(object, objects);
-        SerializationUtils.houseKeeping(field);
-
     }
 
     private <T> T generateEnum(Class<T> enumType, int ordinal) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

@@ -62,7 +62,7 @@ public class SizeComputer {
                 try {
                     arrangeField(field, obj);
                     final Object newObj = field.get(obj);
-                    if (newObj != null && !newObj.getClass().getEnclosingClass().isEnum()) {
+                    if (newObj != null && !SerializationUtils.isEnum(newObj.getClass())) {
                         SizeComputer sizeComputer = new SizeComputer();
                         size += sizeComputer.calculateSize(getAllFields(newObj), newObj);
                     }

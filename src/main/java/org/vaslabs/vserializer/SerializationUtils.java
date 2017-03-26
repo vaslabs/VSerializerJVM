@@ -235,10 +235,6 @@ public class SerializationUtils {
         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
     }
 
-    public static void houseKeeping(Field field) throws IllegalAccessException, NoSuchFieldException {
-        field.setAccessible(false);
-    }
-
     public static <T> int calculateNonPrimitiveArraySize(T[] objects) {
         int totalSize = objects.length + 4;
         for (T object : objects) {
