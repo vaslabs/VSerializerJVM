@@ -14,7 +14,7 @@ allprojects {
 
 ```ruby
 dependencies {
-    compile 'com.github.vaslabs:VSerializerJVM:2.3.4'
+    compile 'com.github.vaslabs:VSerializerJVM:2.3.7'
 }
 ```
 
