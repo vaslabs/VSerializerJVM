@@ -9,8 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.vaslabs.vserializer.SerializationUtils.getAllFields;
-import static org.vaslabs.vserializer.SerializationUtils.skipField;
+import static org.vaslabs.vserializer.SerializationUtils.*;
 
 /**
  * Created by vnicolaou on 02/05/16.
@@ -252,9 +251,16 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return;
             } else {
 
-                Object innerObject = SerializationUtils.instantiate(field.getType());
-                field.set(obj, innerObject);
-                convert(byteBuffer, getAllFields(innerObject), innerObject);
+                final Object innerObject;
+                if (primitiveWrappers.containsKey(field.getType()))  {
+                    innerObject = SerializationUtils.instantiatePrimitiveWrapper(field.getType(), byteBuffer);
+                    field.set(obj, innerObject);
+                }
+                else{
+                    innerObject = SerializationUtils.instantiate(field.getType());
+                    field.set(obj, innerObject);
+                    convert(byteBuffer, getAllFields(innerObject), innerObject);
+                }
                 return;
             }
         }
@@ -460,7 +466,10 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return;
             } else {
                 byteBuffer.put((byte) 1);
-                putIn(byteBuffer, getAllFields(fieldObject), fieldObject);
+                if (primitiveWrappersSizes.containsKey(type)) {
+                    SerializationUtils.writePrimitiveWrapperValue(fieldObject, byteBuffer);
+                } else
+                    putIn(byteBuffer, getAllFields(fieldObject), fieldObject);
                 return;
             }
         }
