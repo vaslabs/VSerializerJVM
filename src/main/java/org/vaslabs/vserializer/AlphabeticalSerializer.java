@@ -9,8 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.vaslabs.vserializer.SerializationUtils.getAllFields;
-import static org.vaslabs.vserializer.SerializationUtils.skipField;
+import static org.vaslabs.vserializer.SerializationUtils.*;
 
 /**
  * Created by vnicolaou on 02/05/16.
@@ -29,7 +28,8 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return SerializationUtils.toBytes(obj);
             }
         }
-        if (obj.getClass().isEnum() || obj.getClass().getEnclosingClass().isEnum()) {
+        Class clazz = obj.getClass();
+        if (clazz.isEnum() || SerializationUtils.isEnum(clazz)) {
             ByteBuffer byteBuffer = ByteBuffer.allocate(4);
             int ordinal = 0;
             try {
@@ -217,12 +217,6 @@ public class AlphabeticalSerializer extends StringSerializer {
                 convert(byteBuffer, field, obj);
             } catch (Exception e) {
                 return null;
-            } finally {
-                try {
-                    SerializationUtils.houseKeeping(field);
-                } catch (Exception e) {
-
-                }
             }
         }
         return obj;
@@ -257,9 +251,16 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return;
             } else {
 
-                Object innerObject = SerializationUtils.instantiate(field.getType());
-                field.set(obj, innerObject);
-                convert(byteBuffer, getAllFields(obj), innerObject);
+                final Object innerObject;
+                if (primitiveWrappers.containsKey(field.getType()))  {
+                    innerObject = SerializationUtils.instantiatePrimitiveWrapper(field.getType(), byteBuffer);
+                    field.set(obj, innerObject);
+                }
+                else{
+                    innerObject = SerializationUtils.instantiate(field.getType());
+                    field.set(obj, innerObject);
+                    convert(byteBuffer, getAllFields(innerObject), innerObject);
+                }
                 return;
             }
         }
@@ -405,8 +406,6 @@ public class AlphabeticalSerializer extends StringSerializer {
         }
         SerializationUtils.arrangeField(field, object);
         field.set(object, objects);
-        SerializationUtils.houseKeeping(field);
-
     }
 
     private <T> T generateEnum(Class<T> enumType, int ordinal) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -467,7 +466,10 @@ public class AlphabeticalSerializer extends StringSerializer {
                 return;
             } else {
                 byteBuffer.put((byte) 1);
-                putIn(byteBuffer, getAllFields(fieldObject), fieldObject);
+                if (primitiveWrappersSizes.containsKey(type)) {
+                    SerializationUtils.writePrimitiveWrapperValue(fieldObject, byteBuffer);
+                } else
+                    putIn(byteBuffer, getAllFields(fieldObject), fieldObject);
                 return;
             }
         }
@@ -551,7 +553,7 @@ public class AlphabeticalSerializer extends StringSerializer {
                 byteBuffer.put((byte) -1);
             } else {
                 byteBuffer.put((byte) 1);
-                final boolean isEnum = object.getClass().getEnclosingClass().isEnum();
+                final boolean isEnum = SerializationUtils.isEnum(object.getClass());
                 if (isEnum) {
                     putEnum(byteBuffer, object);
                     continue;

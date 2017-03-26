@@ -325,4 +325,16 @@ public class TestAlphabeticalSerializer {
 
     }
 
+    @Test
+    public void test_wrapper_primitives() {
+        TestUtils.PrimitiveWrapperClass primitiveWrapperClass = new TestUtils.PrimitiveWrapperClass();
+        primitiveWrapperClass.aBoolean = true;
+        primitiveWrapperClass.aDouble = 1.0;
+        byte[] data = vSerializer.serialize(primitiveWrapperClass);
+        assertEquals(11, data.length);
+        System.out.println(Arrays.toString(data));
+        TestUtils.PrimitiveWrapperClass recoveredClass = vSerializer.deserialise(data, TestUtils.PrimitiveWrapperClass.class);
+        assertTrue(recoveredClass.aBoolean.booleanValue());
+    }
+
 }

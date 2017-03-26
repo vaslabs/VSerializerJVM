@@ -194,4 +194,8 @@ public class TestUtils {
         protected AllEncapsulatedArrayData[] allEncapsulatedData;
     }
 
+    public static class PrimitiveWrapperClass {
+        protected Boolean aBoolean;
+        protected Double aDouble;
+    }
 }

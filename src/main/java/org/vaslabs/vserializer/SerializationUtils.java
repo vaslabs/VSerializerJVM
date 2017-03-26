@@ -18,8 +18,9 @@ import java.util.WeakHashMap;
 public class SerializationUtils {
     static Map<Class, Integer> sizes = new HashMap<>();
     static Map<Class, PrimitiveType> enumTypes = new HashMap<Class, PrimitiveType>();
+    static Map<Class, PrimitiveType> primitiveWrappersDictionary = new HashMap<Class, PrimitiveType>();
     static Map<Class, Method> primitiveWrappers = new HashMap<Class, Method>();
-
+    static Map<Class, Integer> primitiveWrappersSizes = new HashMap<>();
     static {
         try {
             primitiveWrappers.put(Integer.class, Integer.class.getMethod("valueOf", Integer.TYPE));
@@ -31,6 +32,38 @@ public class SerializationUtils {
             primitiveWrappers.put(Character.class, Character.class.getMethod("valueOf", Character.TYPE));
             primitiveWrappers.put(Byte.class, Byte.class.getMethod("valueOf", Byte.TYPE));
             primitiveWrappers = Collections.unmodifiableMap(primitiveWrappers);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+    }
+
+    static {
+        try {
+            primitiveWrappersDictionary.put(Integer.class, PrimitiveType.INT);
+            primitiveWrappersDictionary.put(Boolean.class, PrimitiveType.BOOLEAN);
+            primitiveWrappersDictionary.put(Short.class, PrimitiveType.SHORT);
+            primitiveWrappersDictionary.put(Long.class, PrimitiveType.LONG);
+            primitiveWrappersDictionary.put(Double.class, PrimitiveType.DOUBLE);
+            primitiveWrappersDictionary.put(Float.class, PrimitiveType.FLOAT);
+            primitiveWrappersDictionary.put(Character.class, PrimitiveType.CHAR);
+            primitiveWrappersDictionary.put(Byte.class, PrimitiveType.BYTE);
+            primitiveWrappersDictionary = Collections.unmodifiableMap(primitiveWrappersDictionary);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+    }
+
+    static {
+        try {
+            primitiveWrappersSizes.put(Integer.class, 4);
+            primitiveWrappersSizes.put(Boolean.class, 1);
+            primitiveWrappersSizes.put(Short.class, 2);
+            primitiveWrappersSizes.put(Long.class, 8);
+            primitiveWrappersSizes.put(Double.class, 8);
+            primitiveWrappersSizes.put(Float.class, 4);
+            primitiveWrappersSizes.put(Character.class, 2);
+            primitiveWrappersSizes.put(Byte.class, 1);
+            primitiveWrappersSizes = Collections.unmodifiableMap(primitiveWrappersSizes);
         } catch (Exception e) {
             System.exit(1);
         }
@@ -83,6 +116,11 @@ public class SerializationUtils {
         return constructor.newInstance(null);
     }
 
+    public static boolean isEnum(Class clazz) {
+        Class enclosingClass = clazz.getEnclosingClass();
+        return enclosingClass != null && enclosingClass.isEnum();
+    }
+
     public static int calculateSize(Field[] fields, Object obj) {
         int size = 0;
         for (Field field : fields) {
@@ -93,6 +131,18 @@ public class SerializationUtils {
                 continue;
             }
             else if (!field.getType().isPrimitive()) {
+                if (primitiveWrappers.containsKey(field.getType())) {
+                    size += 1;
+                    field.setAccessible(true);
+                    try {
+                        final Object newObj = field.get(obj);
+                        if (newObj != null)
+                            size += primitiveWrappersSizes.get(field.getType());
+                        continue;
+                    } catch (IllegalAccessException iae) {
+
+                    }
+                }
                 if (field.getType().equals(String.class)) {
                     try {
                         try {
@@ -159,9 +209,7 @@ public class SerializationUtils {
                 continue;
             }
             Class type = object.getClass();
-            Class enclosingClass = type.getEnclosingClass();
-            final boolean isEnum = enclosingClass != null && enclosingClass.isEnum();
-            if (isEnum)
+            if (isEnum(type))
                 sizeSum += 1;
             else
                 sizeSum += calculateSize(getAllFields(type), object);
@@ -230,10 +278,6 @@ public class SerializationUtils {
         Field modifiersField = Field.class.getDeclaredField("modifiers");
         modifiersField.setAccessible(true);
         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-    }
-
-    public static void houseKeeping(Field field) throws IllegalAccessException, NoSuchFieldException {
-        field.setAccessible(false);
     }
 
     public static <T> int calculateNonPrimitiveArraySize(T[] objects) {
@@ -407,6 +451,32 @@ public class SerializationUtils {
                 return (T)valueOfMethod.invoke(null, byteBuffer.getDouble());
         }
         return null;
+    }
+
+    protected static void writePrimitiveWrapperValue(Object obj, ByteBuffer byteBuffer) {
+        Class wrapperClass = obj.getClass();
+        PrimitiveType enumType = primitiveWrappersDictionary.get(wrapperClass);
+        switch (enumType) {
+            case INT:
+                byteBuffer.putInt(((Integer) obj).intValue());
+                break;
+            case SHORT:
+                byteBuffer.putShort(((Short) obj).shortValue());
+                break;
+            case LONG:
+                byteBuffer.putLong(((Long) obj).longValue()); break;
+            case FLOAT:
+                byteBuffer.putFloat(((Float) obj).floatValue()); break;
+            case BOOLEAN:
+                byteBuffer.put((byte) (((Boolean) obj).booleanValue() ? 1 : 0)); break;
+            case BYTE:
+                byteBuffer.put(((Byte) obj).byteValue()); break;
+            case CHAR:
+                byteBuffer.putChar(((Character) obj).charValue()); break;
+            case DOUBLE:
+                byteBuffer.putDouble(((Double) obj).doubleValue()); break;
+
+        }
     }
 
 }
