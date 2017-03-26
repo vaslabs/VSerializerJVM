@@ -237,13 +237,13 @@ public class SerializationUtils {
     }
 
     public static <T> int calculateNonPrimitiveArraySize(T[] objects) {
-        final Field[] fields = getAllFields(objects[0]);
-        final int sizeOfSingleObject = SerializationUtils.calculateSize(fields, objects[0]);
-
         int totalSize = objects.length + 4;
         for (T object : objects) {
-            if (object != null)
+            if (object != null) {
+                final Field[] fields = getAllFields(object);
+                final int sizeOfSingleObject = SerializationUtils.calculateSize(fields, object);
                 totalSize += sizeOfSingleObject;
+            }
         }
         return totalSize;
     }
