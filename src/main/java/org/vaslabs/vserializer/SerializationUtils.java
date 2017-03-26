@@ -159,7 +159,8 @@ public class SerializationUtils {
                 continue;
             }
             Class type = object.getClass();
-            final boolean isEnum = type.getEnclosingClass().isEnum();
+            Class enclosingClass = type.getEnclosingClass();
+            final boolean isEnum = enclosingClass != null && enclosingClass.isEnum();
             if (isEnum)
                 sizeSum += 1;
             else
