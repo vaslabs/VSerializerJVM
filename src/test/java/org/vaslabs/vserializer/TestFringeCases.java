@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -237,6 +238,22 @@ public class TestFringeCases {
         assertEquals(strings[0], recoveredStrings[0]);
         assertEquals(strings[1], recoveredStrings[1]);
         assertEquals(strings[2], recoveredStrings[2]);
+    }
+
+    @Test
+    public void test_inconsistent_array_size() {
+        TestUtils.InconsistenceSizedCollection inconsistenceSizedCollection = new TestUtils.InconsistenceSizedCollection();
+        inconsistenceSizedCollection.allEncapsulatedData = new TestUtils.AllEncapsulatedArrayData[2];
+        inconsistenceSizedCollection.allEncapsulatedData[0] = new TestUtils.AllEncapsulatedArrayData();
+        inconsistenceSizedCollection.allEncapsulatedData[0].floats = new float[1];
+        inconsistenceSizedCollection.allEncapsulatedData[1] = new TestUtils.AllEncapsulatedArrayData();
+        inconsistenceSizedCollection.allEncapsulatedData[1].doubles = new double[1];
+        byte[] data = vSerializer.serialize(inconsistenceSizedCollection);
+        System.out.println(Arrays.toString(data));
+        System.out.println(data.length);
+        TestUtils.InconsistenceSizedCollection recoveredInconsistenceSizedCollection = vSerializer.deserialise(data, TestUtils.InconsistenceSizedCollection.class);
+        assertEquals(1, recoveredInconsistenceSizedCollection.allEncapsulatedData[0].floats.length);
+        assertEquals(1, recoveredInconsistenceSizedCollection.allEncapsulatedData[1].doubles.length);
     }
 
 

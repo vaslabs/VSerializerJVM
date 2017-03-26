@@ -356,15 +356,9 @@ public class SerializationUtils {
         for (int i = 0; i<preAllocatedValues.length; i++) { preAllocatedValues[i] = byteBuffer.getFloat(); }
     }
 
-    private static Map<Class, Field[]> classToFieldMap = new WeakHashMap<>();
 
     public static <T> Field[] getAllFields(T obj) {
-        Field[] fields = classToFieldMap.get(obj.getClass());
-        if (fields != null)
-            return fields;
-        fields = getAllFields(obj.getClass().getDeclaredFields(), obj.getClass().getSuperclass());
-        classToFieldMap.put(obj.getClass(), fields);
-        return fields;
+        return getAllFields(obj.getClass().getDeclaredFields(), obj.getClass().getSuperclass());
     }
 
     public static Field[] getAllFields(Class clazz) {

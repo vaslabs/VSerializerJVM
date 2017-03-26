@@ -190,4 +190,8 @@ public class TestUtils {
         protected static int staticNumber;
     }
 
+    public static class InconsistenceSizedCollection {
+        protected AllEncapsulatedArrayData[] allEncapsulatedData;
+    }
+
 }
