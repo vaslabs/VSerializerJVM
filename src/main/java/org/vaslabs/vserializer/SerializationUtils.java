@@ -83,6 +83,11 @@ public class SerializationUtils {
         return constructor.newInstance(null);
     }
 
+    public static boolean isEnum(Class clazz) {
+        Class enclosingClass = clazz.getEnclosingClass();
+        return enclosingClass != null && enclosingClass.isEnum();
+    }
+
     public static int calculateSize(Field[] fields, Object obj) {
         int size = 0;
         for (Field field : fields) {
@@ -159,9 +164,7 @@ public class SerializationUtils {
                 continue;
             }
             Class type = object.getClass();
-            Class enclosingClass = type.getEnclosingClass();
-            final boolean isEnum = enclosingClass != null && enclosingClass.isEnum();
-            if (isEnum)
+            if (isEnum(type))
                 sizeSum += 1;
             else
                 sizeSum += calculateSize(getAllFields(type), object);

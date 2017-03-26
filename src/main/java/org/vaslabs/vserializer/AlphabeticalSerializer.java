@@ -551,7 +551,7 @@ public class AlphabeticalSerializer extends StringSerializer {
                 byteBuffer.put((byte) -1);
             } else {
                 byteBuffer.put((byte) 1);
-                final boolean isEnum = object.getClass().getEnclosingClass().isEnum();
+                final boolean isEnum = SerializationUtils.isEnum(object.getClass());
                 if (isEnum) {
                     putEnum(byteBuffer, object);
                     continue;
